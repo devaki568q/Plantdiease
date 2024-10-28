@@ -1,0 +1,188 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Plant Disease Detection</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <style>
+        /* Global Styling */
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        h1 {
+            text-align: center;
+            color: #4CAF50;
+        }
+
+        #upload-form {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            background-color: #fff;
+            border-radius: 10px;
+            padding: 30px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            max-width: 400px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        #file {
+            margin: 20px 0;
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            width: 100%;
+        }
+
+        button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            width: 100%;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        #image-container {
+            text-align: center;
+            margin-top: 20px;
+            width: 100%;
+        }
+
+        #image-container img {
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            max-width: 100%;
+            height: auto;
+        }
+
+        #result {
+            background-color: #fff;
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            max-width: 600px;
+            margin: 20px auto;
+            width: 100%;
+        }
+
+        #result h2 {
+            color: #333;
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+
+        #result h3 {
+            color: #4CAF50;
+            font-size: 20px;
+            margin-bottom: 5px;
+        }
+
+        #result p {
+            font-size: 16px;
+            color: #555;
+        }
+
+        /* Responsive Media Query */
+        @media screen and (max-width: 768px) {
+            #upload-form, #result {
+                padding: 20px;
+                max-width: 100%;
+            }
+
+            h1 {
+                font-size: 28px;
+            }
+
+            button {
+                font-size: 14px;
+            }
+        }
+
+        @media screen and (max-width: 480px) {
+            h1 {
+                font-size: 22px;
+            }
+
+            #upload-form {
+                padding: 15px;
+            }
+
+            #result h2 {
+                font-size: 20px;
+            }
+
+            button {
+                font-size: 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Plant Disease Detection</h1>
+
+    <form id="upload-form" enctype="multipart/form-data">
+        <input type="file" name="file" id="file" accept="image/*" required />
+        <button type="submit">Upload</button>
+    </form>
+
+    <div id="image-container">
+        <!-- The uploaded image will be displayed here -->
+    </div>
+
+    <div id="result">
+        <!-- The prediction result will be displayed here -->
+    </div>
+
+    <script>
+    $(document).ready(function() {
+        $('#upload-form').on('submit', function(event) {
+            event.preventDefault();  // Prevent default form submission
+
+            var formData = new FormData(this);
+
+            $.ajax({
+                url: '/predict',
+                type: 'POST',
+                data: formData,
+                contentType: false,
+                processData: false,
+                success: function(response) {
+                    // Display the base64-encoded image first
+                    var imgHtml = '<img src="data:image/jpeg;base64,' + response.image_base64 + '" width="200"/>';
+                    $('#image-container').html(imgHtml);
+
+                    // Then display the prediction result and details
+                    $('#result').html('<h2>Predicted Label: ' + response.predicted_label + '</h2>');
+                    $('#result').append('<h3>Symptoms</h3><p>' + response.db_details.Symptoms + '</p>');
+                    $('#result').append('<h3>Medicine</h3><p>' + response.db_details.Medicine + '</p>');
+                    $('#result').append('<h3>Cure</h3><p>' + response.db_details.Cure + '</p>');
+                },
+                error: function(err){
+                    console.error('Error:', err);
+                }
+            });
+        });
+    });
+    </script>
+
+</body>
+</html>
